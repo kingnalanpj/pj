@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create New Restaurant Record</title>
+    <link href="css/bootstrap.min.css" rel = "stylesheet" type="text/css"/>
+</head>
+<body>
+    <div class = "jumbotron">
+        <h1>&nbspCreate New Restaurant Record</h1>
+    </div>
+
+    <div class="col-lg-11">
+    <form action=/create" method="post" >
+        <div class="form-group">
+            <label for="restaurantName">Name*</label>
+            <input name="name" type="text" class="form-control" id="restaurantName" placeholder="Restaurant Name (*required)">
+        </div>
+        <div class="form-group">
+            <label for="borough">Borough</label>
+            <input name="borough" type="text" class="form-control" id="borough" placeholder="Borough">
+        </div>
+        <div class="form-group">
+            <label for="cuisine">Cuisine</label>
+            <input name="cuisine" type="text" class="form-control" id="cuisine" placeholder="Cuisine">
+        </div>
+        <div class="form-group">
+            <label for="street">Street</label>
+            <input name="street" type="text" class="form-control" id="street" placeholder="Street">
+        </div>
+        <div class="form-group">
+            <label for="building">Building</label>
+            <input name="building" type="text" class="form-control" id="building" placeholder="Building">
+        </div>
+        <div class="form-group">
+            <label for="zipcode">Zipcode</label>
+            <input name="zipcode" type="text" class="form-control" id="zipcode" placeholder="Zipcode">
+        </div>
+        <div class="form-group">
+            <label for="lon">GPS Coordinates (lon.)</label>
+            <input name="lon" type="text" class="form-control" id="lon" placeholder="Lon">
+        </div>
+        <div class="form-group">
+            <label for="lat">GPS Coordinates (lat.)</label>
+            <input name="lat" type="text" class="form-control" id="lat" placeholder="Lat">
+        </div>
+
+        <div class="form-group">
+            <label for="photo">Photo</label>
+            <input type="file" id="photo" name="photo">
+        </div>
+        <div class="form-group col-lg-1">
+            <button type="submit" class="btn btn-default btn-block">Submit</button>
+        </div>
+        <button type="reset" class="btn btn-default">Reset</button>
+        <a class="btn btn-default" href="/read" role="button">Back</a>
+
+    </form>
+    </div>
+
+</body>
+</html>

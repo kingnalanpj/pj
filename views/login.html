@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+
+    <link href="css/bootstrap.min.css" rel = "stylesheet" type="text/css"/>
+</head>
+<body>
+    <div class = "jumbotron">
+            <h1>&nbspLogin</h1>
+    </div>
+
+
+    <form class="form-horizontal" action="/login" method="post">
+        <div class="form-group">
+            <label for="userName" class="col-lg-1 control-label">Name</label>
+            <div class="col-lg-3">
+                <input type="text" class="form-control" id="userName" placeholder="User Name" name="userName">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="userPW" class="col-lg-1 control-label">Password</label>
+            <div class="col-lg-3">
+                <input type="password" class="form-control" id="userPW" placeholder="Password" name="userPW">
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-lg-offset-1 col-lg-2">
+                <button type="submit" class="btn btn-default">Sign in</button>
+            </div>
+        </div>
+    </form>
+
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Restaurants</title>
+
+    <link href="css/bootstrap.min.css" rel = "stylesheet" type="text/css"/>
+</head>
+<body>
+    <div class = "jumbotron">
+        <h1>&nbspRestaurants</h1>
+        <p>&nbsp&nbspUser: <%=userName%></p>
+        <p>&nbsp&nbspShowing <%=restaurants.length%> documents(criteria: <%=criteria%>)</p>
+    </div>
+    <p>
+    <form class="form-inline" action="/search" method="post">
+        <div class="form-group col-lg-1"><a class="btn btn-default btn-block" href="/new" role="button">New</a></div>
+        <div class="form-group">
+            <input type="text" class="form-control" placeholder="Name/Borough/Cuisine" name="serach">
+        </div>
+        <div class="form-group">
+            <select name="option" class="form-control">
+                <option value="name">name</option>
+                <option value="borough">borough</option>
+                <option value="cuisine">cuisine</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-default">Search</button>
+        </div>
+    </form>
+    </p>
+    </br>
+    <table class="table table-striped">
+        <tr><th>#</th><th>Restaurant Name</th></tr>
+        <% for(var i = 0; i < restaurants.length; i++){ %>
+        <tr><td><%=i+1%>></td><td><a href="/display?_id=<%=restaurants[i]._id.toString()%>"><%=restaurants[i].name%></a></td>></tr>
+        <% } %>
+    </table>
+
+</body>
+</html>
