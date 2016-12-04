@@ -10,7 +10,7 @@ var mongourl = 'mongodb://alanking:alanking@ds119728.mlab.com:19728/comps381fpj'
 var restaurantSchema = require('./models/restaurant');
 var userSchema = require('./models/user');
 
-mongoose.connect(mongourl);
+
 
 app.use(session({
     name: 'session',
@@ -124,7 +124,7 @@ app.post("/create", function(req, res){
     rObj.photo = new Buffer(req.files.sampleFile.data).toString('base64');
     rObj.minetype = req.files.sampleFile.mimetype;
 
-    //mongoose.connect(mongourl);
+    mongoose.connect(mongourl);
     var db = mongoose.Connection;
     db.on('error', console.error.bind(console,'connection error'));
     db.once('open',function(callback){
@@ -157,7 +157,7 @@ function checkLogin(req, res, next){
 }
 
 function findReastaurant(criteria, back){
-    //mongoose.connect(mongourl);
+    mongoose.connect(mongourl);
     var db = mongoose.Connection;
     db.on('error', console.error.bind(console,'connection error'));
     db.once('open',function (callback) {
@@ -171,7 +171,7 @@ function findReastaurant(criteria, back){
 }
 
 function getRestaurantDetail(id,back){
-    //mongoose.connect(mongourl);
+    mongoose.connect(mongourl);
     var db = mongoose.Connection;
     db.on('error', console.error.bind(console,'connection error'));
     db.once('open',function(callback){
@@ -187,7 +187,7 @@ function getRestaurantDetail(id,back){
 }
 
 function verifyUser(userObj, back){
-
+    mongoose.connect(mongourl);
     var db = mongoose.Connection;
     db.on('error', console.error.bind(console, 'connection error'));
     db.once('open', function(callback){
