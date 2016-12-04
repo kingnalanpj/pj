@@ -205,7 +205,7 @@ app.post("/rate",checkLogin,function (req, res) {
        if(!check){
            restaurant.rating.push(
                {
-                   "rate":req.body.rating,
+                   "rate":req.body.score,
                    "rateBy":req.session.userName
                }
            );
