@@ -12,7 +12,7 @@
         <p>&nbsp&nbspUser: <%=userName%></p>
         <p>&nbsp&nbspShowing <%=restaurants.length%> documents(criteria: <%=criteria%>)</p>
     </div>
-    <form class="form-inline" action="/search" method="post">
+    <form class="form-inline" action="/read" method="get">
         <div class="form-group col-lg-1"><a class="btn btn-default btn-block" href="/new" role="button">New</a></div>
         <div class="form-group">
             <input type="text" class="form-control" placeholder="Name/Borough/Cuisine" name="search">

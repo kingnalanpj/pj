@@ -60,6 +60,21 @@ app.post("/login", function(req, res){
 
 app.get("/read",checkLogin,function(req,res){
     var criteria = {};
+    if(req.query.option != undefined){
+        switch (req.query.option){
+            case 'name':
+                criteria.name = req.query.search;
+                break;
+            case 'borough':
+                criteria.borough = req.query.search;
+                break;
+            case 'cuisine':
+                criteria.cuisine = req.query.search;
+                break;
+        }
+        if (req.query.search == "")
+            criteria = {};
+    }
     findReastaurant(criteria,function (docs) {
        res.render("restaurants",{
            "userName" : req.session.userName,
@@ -74,11 +89,7 @@ app.get("/read/name/:value",checkLogin,function (req,res) {
         "name" : req.params.value
     };
     findReastaurant(criteria,function (docs) {
-        res.render("restaurants",{
-            "userName" : req.session.userName,
-            "restaurants" : docs,
-            "criteria" : JSON.stringify(criteria)
-        });
+        res.end(JSON.stringify(docs));
     });
 });
 
@@ -87,11 +98,7 @@ app.get("/read/borough/:value",checkLogin,function (req,res) {
         "borough" : req.params.value
     };
     findReastaurant(criteria,function (docs) {
-        res.render("restaurants",{
-            "userName" : req.session.userName,
-            "restaurants" : docs,
-            "criteria" : JSON.stringify(criteria)
-        });
+        res.end(JSON.stringify(docs));
     });
 });
 
@@ -100,11 +107,7 @@ app.get("/read/cuisine/:value",checkLogin,function (req,res) {
         "cuisine" : req.params.value
     };
     findReastaurant(criteria,function (docs) {
-        res.render("restaurants",{
-            "userName" : req.session.userName,
-            "restaurants" : docs,
-            "criteria" : JSON.stringify(criteria)
-        });
+        res.end(JSON.stringify(docs));
     });
 });
 
@@ -121,7 +124,7 @@ app.get("/new",checkLogin, function (req,res) {
     res.sendFile( __dirname + '/views/new.html')
 });
 
-app.post("/create",checkLogin, function(req, res){
+app.post("/new",checkLogin, function(req, res){
 
     if(req.body.name == ""){
         res.render("msg",{
@@ -144,7 +147,7 @@ app.post("/create",checkLogin, function(req, res){
     rObj.cuisine = req.body.cuisine;
     rObj.name = req.body.name;
     rObj.createBy = req.session.userName;
-    if(req.files) {
+    if(req.files && req.files.photo.data.length > 0) {
         console.log("i have a photo");
         rObj.photo = new Buffer(req.files.photo.data).toString('base64');
         rObj.minetype = req.files.photo.mimetype;
@@ -166,6 +169,19 @@ app.post("/create",checkLogin, function(req, res){
     });
     //})
 
+});
+
+app.post("/create", function(req, res){
+    var body = "";
+    console.log(req.body.address);
+
+    var r = new restaurant(req.body);
+    r.save(function(err, docs) {
+        if(err){
+            res.end(JSON.stringify({"status" : "failed"}));
+        }else
+            res.end(JSON.stringify({"status" : "ok", "_id" : docs._id.toString() }));// console.log('Restaurant created!')
+    });
 });
 
 app.get("/display",checkLogin,function (req,res) {
@@ -196,7 +212,7 @@ app.post("/rate",checkLogin,function (req, res) {
 
        var check = false;
        for (var i = 0; i < restaurant.rating.length; i++){
-           if(req.session.userName == docs.rating[i].rateBy){
+           if(req.session.userName == restaurant.rating[i].rateBy){
                check = true;
                break;
            }
@@ -224,30 +240,54 @@ app.post("/rate",checkLogin,function (req, res) {
 });
 
 app.get("/delete", function(req,res){
-    restaurant.remove({_id : ObjectId(req.query._id)}, function(err){
-        if(err) return console.error(err);
+    getRestaurantDetail({
+        "_id" : req.query._id
+    },function (docs) {
+        if(req.session.userName != docs.createBy){
+            res.render("msg",{
+                "title" : "Error",
+                "msg" : "Only the record creater can delete the restaurant record.",
+                "back" : "display?_id="+req.query._id
+            });
+        }else{
+            restaurant.remove({_id : ObjectId(req.query._id)}, function(err){
+                if(err) return console.error(err);
 
-        res.render("msg",{
-            "title" : "Info",
-            "msg" : "Delete successful!",
-            "back" : "read"
-        })
+                res.render("msg",{
+                    "title" : "Info",
+                    "msg" : "Delete successful!",
+                    "back" : "read"
+                })
 
+            });
+        }
     });
+
+
 });
 
 app.get("/edit",checkLogin,function (req,res) {
-    findReastaurant({
+    getRestaurantDetail({
         "_id" : req.query._id
     },function (docs) {
-        res.render("edit",{
-            "restaurant" : docs
-        })
+        if(req.session.userName != docs.createBy){
+            res.render("msg",{
+                "title" : "Error",
+                "msg" : "Only the record creater can edit the restaurant record.",
+                "back" : "display?_id="+req.query._id
+            });
+        }else{
+            res.render("edit",{
+                "restaurant" : docs
+            })
+        }
+
+
     })
 });
 
 app.post("/edit",checkLogin,function (req,res) {
-    restaurant.findByid(req.body._id, function (err, restaurant) {
+    restaurant.findById(req.body._id, function (err, restaurant) {
         if (err) return console.error(err);
 
         restaurant.name = req.body.name;
@@ -259,9 +299,9 @@ app.post("/edit",checkLogin,function (req,res) {
         var coord = [req.body.lon, req.body.lat];
         restaurant.address.coord = coord;
 
-        if(req.files) {
-            restaurant.photo = new Buffer(req.files.sampleFile.data).toString('base64');
-            restaurant.minetype = req.files.sampleFile.mimetype;
+        if(req.files && req.files.photo.data.length > 0) {
+            restaurant.photo = new Buffer(req.files.photo.data).toString('base64');
+            restaurant.minetype = req.files.photo.mimetype;
         }
 
         restaurant.save(function (err,docs) {
@@ -271,7 +311,7 @@ app.post("/edit",checkLogin,function (req,res) {
     });
 });
 
-app.get("/map", function(req,res) {
+app.get("/map", checkLogin,function(req,res) {
 
     res.render("gmap",{
         'lat' : req.query.lat,
