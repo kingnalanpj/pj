@@ -6,7 +6,7 @@ var mongoose = require('mongoose');
 var assert = require('assert');
 var app = express();
 var ObjectId = require('mongodb').ObjectID;
-var mongourl = 'mongodb://alanking:alanking@ds119728.mlab.com:19728/comps381fpj';
+var mongourl = 'mongodb://admin:admin@ds119728.mlab.com:19728/comps381fpj';
 var restaurantSchema = require('./models/restaurant');
 var userSchema = require('./models/user');
 
