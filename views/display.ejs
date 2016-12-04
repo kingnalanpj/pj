@@ -6,12 +6,12 @@
 
     <link href="css/bootstrap.min.css" rel = "stylesheet" type="text/css"/>
 </head>
-<</bo>
+</bo>
     <div class = "jumbotron">
-        <h1>&nbsp<%=name%>></h1>
+        <h1>&nbsp<%=restaurant.name%></h1>
     </div>
 
-    <% if(restaurant.photo != ""){ %>
+    <% if(restaurant.photo != null){ %>
         <img class="img-thumbnail" src="data:<%=restaurant.minetype%>;base64,<%=restaurant.photo%>"/>
         <hr>
     <%}%>
@@ -34,17 +34,21 @@
         </dd>
         <dt>Created by:</dt><dd><%=restaurant.createBy%></dd>
     </dl>
-    <% if (restaurant.address.coord[0] != null && restaurant.address.cooed[1] != null) {%>
+    <% if (restaurant.address.coord[0] != null && restaurant.address.coord[1] != null) {%>
         <div class="col-lg-5">
-            <a href="/map?lat=<%=restaurant.address.coord[0]%>&lon=<%=restaurant.address.coord[1]%>&zoom=16&name=<%=restaurant.name%>" class="btn btn-default" role="button">Check on Google Map</a>
+            <a href="/map?lat=<%=restaurant.address.coord[0]%>&lon=<%=restaurant.address.coord[1]%>&name=<%=restaurant.name%>" class="btn btn-default" role="button">Check on Google Map</a>
         </div>
     <% }%>
     <br>
     <br>
-    <div class="col-lg-1">
-        <a class="btn btn-default" href="/rate?_id=<%restaurant._id.toString()%>" role="button">Rate</a>
-        <a class="btn btn-default" href="/edit?_id=<%restaurant._id.toString()%>" role="button">Edit</a>
-        <a class="btn btn-default" href="/delete?_id=<%restaurant._id.toString()%>" role="button">Delete</a>
+    <div class="row">
+        &nbsp&nbsp&nbsp&nbsp
+        <a class="btn btn-default" href="/rate?_id=<%=restaurant._id.toString()%>" role="button">Rate</a>
+
+        <a class="btn btn-default" href="/edit?_id=<%=restaurant._id.toString()%>" role="button">Edit</a>
+
+        <a class="btn btn-default" href="/delete?_id=<%=restaurant._id.toString()%>" role="button">Delete</a>
+
         <a class="btn btn-default" href="/read" role="button">Back</a>
     </div>
 </body>

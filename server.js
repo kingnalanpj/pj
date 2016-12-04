@@ -7,16 +7,21 @@ var assert = require('assert');
 var app = express();
 var ObjectId = require('mongodb').ObjectID;
 var mongourl = 'mongodb://admin:admin@ds119728.mlab.com:19728/comps381fpj';
+
+
+mongoose.connect(mongourl);
 var restaurantSchema = require('./models/restaurant');
 var userSchema = require('./models/user');
-
-
+var user = mongoose.model('users', userSchema);
+var restaurant = mongoose.model('restaurants',restaurantSchema);
 
 app.use(session({
     name: 'session',
     keys: ['key1'],
     maxAge: 5 * 60 * 1000
 }));
+
+app.use(express.static(__dirname + '/views'));
 
 app.use(bodyParser.urlencoded({
     extended: true
@@ -27,12 +32,16 @@ app.use(bodyParser.json());
 app.set('view engine','ejs');
 
 app.get("/", function (req, res){
-    if(req.session.userName == null && req.body.userName == null){
-        res.sendFile(__dirname + '/views/login.html');
-    }
+    if(req.session.userName != null)
+        return res.redirect('/read');
+
+    res.sendFile(__dirname + '/views/login.html');
+
 });
 
 app.get("/login", function(req, res){
+    if(req.session.userName != null)
+        return res.redirect('/read');
     res.sendFile(__dirname + '/views/login.html');
 });
 
@@ -60,7 +69,7 @@ app.get("/read",checkLogin,function(req,res){
     });
 });
 
-app.get("/read/name/:value",function (req,res) {
+app.get("/read/name/:value",checkLogin,function (req,res) {
     var criteria = {
         "name" : req.params.value
     };
@@ -73,7 +82,7 @@ app.get("/read/name/:value",function (req,res) {
     });
 });
 
-app.get("/read/borough/:value",function (req,res) {
+app.get("/read/borough/:value",checkLogin,function (req,res) {
     var criteria = {
         "borough" : req.params.value
     };
@@ -86,7 +95,7 @@ app.get("/read/borough/:value",function (req,res) {
     });
 });
 
-app.get("/read/cuisine/:value",function (req,res) {
+app.get("/read/cuisine/:value",checkLogin,function (req,res) {
     var criteria = {
         "cuisine" : req.params.value
     };
@@ -99,16 +108,30 @@ app.get("/read/cuisine/:value",function (req,res) {
     });
 });
 
-app.post("/search",function (req,res) {
+app.post("/search",checkLogin,function (req,res) {
+    if (req.body.search == null){
+        redirect("/read");
+        return;
+    }
     var goTo = "/read"+"/"+req.body.option +"/"+req.body.search;
     res.redirect(goTo);
 });
 
-app.get("/new", function (req,res) {
+app.get("/new",checkLogin, function (req,res) {
     res.sendFile( __dirname + '/views/new.html')
 });
 
-app.post("/create", function(req, res){
+app.post("/create",checkLogin, function(req, res){
+
+    if(req.body.name == ""){
+        res.render("msg",{
+            "title" : "Error",
+            "msg" : "You must input restaurant name.",
+            "back"  : "new"
+        });
+        return;
+    }
+
     var rObj = {};
     rObj.address = {};
     rObj.address.building = req.body.building;
@@ -120,26 +143,32 @@ app.post("/create", function(req, res){
     rObj.borough = req.body.borough;
     rObj.cuisine = req.body.cuisine;
     rObj.name = req.body.name;
-    rObj.createBy = req.session.user_name;
-    rObj.photo = new Buffer(req.files.sampleFile.data).toString('base64');
-    rObj.minetype = req.files.sampleFile.mimetype;
-
-    mongoose.connect(mongourl);
-    var db = mongoose.Connection;
-    db.on('error', console.error.bind(console,'connection error'));
-    db.once('open',function(callback){
-        var restaurant = mongoose.model('restaurants',restaurantSchema);
-        var r = new restaurant(rObj);
-        r.save(function(err, docs) {
-            if (err) return console.error(err);
-            db.close();
-            res.redirect("/display?_id="+docs._id.toString());
-        });
-    })
+    rObj.createBy = req.session.userName;
+    if(req.files) {
+        console.log("i have a photo");
+        rObj.photo = new Buffer(req.files.photo.data).toString('base64');
+        rObj.minetype = req.files.photo.mimetype;
+    }else{
+        console.log("i have not photo");
+        rObj.photo = null;
+        rObj.minetype = null;
+    }
+    //mongoose.connect(mongourl);
+    //var db = mongoose.Connection;
+    //db.on('error', console.error.bind(console,'connection error'));
+    //db.once('open',function(callback){
+    //   var restaurant = mongoose.model('restaurants',restaurantSchema);
+    var r = new restaurant(rObj);
+    r.save(function(err, docs) {
+        if (err) return console.error(err);
+        //db.close();
+        res.redirect("/display?_id="+docs._id.toString());
+    });
+    //})
 
 });
 
-app.get("/display",function (req,res) {
+app.get("/display",checkLogin,function (req,res) {
     if (req.query._id == null)
         return res.redirect("/read");
     getRestaurantDetail(req.query._id,function (docs) {
@@ -150,6 +179,108 @@ app.get("/display",function (req,res) {
     })
 });
 
+app.get("/rate",checkLogin,function (req, res) {
+    if ( req.query._id == null){
+        res.redirect('/read');
+        return;
+    }
+
+    res.render("rate",{
+        "_id": req.query._id
+    });
+});
+
+app.post("/rate",checkLogin,function (req, res) {
+   restaurant.findById(req.body._id, function (err, restaurant) {
+       if (err) return console.error(err);
+
+       var check = false;
+       for (var i = 0; i < restaurant.rating.length; i++){
+           if(req.session.userName == docs.rating[i].rateBy){
+               check = true;
+               break;
+           }
+       }
+
+       if(!check){
+           restaurant.rating.push(
+               {
+                   "rate":req.body.rating,
+                   "rateBy":req.session.userName
+               }
+           );
+           restaurant.save(function(err, docs){
+               if (err) return console.error(err);
+               res.redirect("/display?_id="+req.body._id);
+           })
+       }else{
+           res.render("msg",{
+               "title" : "Error",
+               "msg" : "You are already rated for this restaurant.",
+               "back" : "display?_id="+req.body._id
+           })
+       }
+   })
+});
+
+app.get("/delete", function(req,res){
+    restaurant.remove({_id : ObjectId(req.query._id)}, function(err){
+        if(err) return console.error(err);
+
+        res.render("msg",{
+            "title" : "Info",
+            "msg" : "Delete successful!",
+            "back" : "read"
+        })
+
+    });
+});
+
+app.get("/edit",checkLogin,function (req,res) {
+    findReastaurant({
+        "_id" : req.query._id
+    },function (docs) {
+        res.render("edit",{
+            "restaurant" : docs
+        })
+    })
+});
+
+app.post("/edit",checkLogin,function (req,res) {
+    restaurant.findByid(req.body._id, function (err, restaurant) {
+        if (err) return console.error(err);
+
+        restaurant.name = req.body.name;
+        restaurant.borough = req.body.borough;
+        restaurant.cuisine = req.body.cuisine;
+        restaurant.address.street = req.body.street;
+        restaurant.address.building = req.body.building;
+        restaurant.address.zipcode = req.body.zipcode;
+        var coord = [req.body.lon, req.body.lat];
+        restaurant.address.coord = coord;
+
+        if(req.files) {
+            restaurant.photo = new Buffer(req.files.sampleFile.data).toString('base64');
+            restaurant.minetype = req.files.sampleFile.mimetype;
+        }
+
+        restaurant.save(function (err,docs) {
+            if (err) return console.error(err);
+            res.redirect("/display?_id=" + docs._id.toString());
+        })
+    });
+});
+
+app.get("/map", function(req,res) {
+
+    res.render("gmap",{
+        'lat' : req.query.lat,
+        'lon' : req.query.lon,
+        'name' : req.query.name
+    });
+    res.end();
+});
+
 function checkLogin(req, res, next){
     if(req.session.userName != null)
         return next();
@@ -157,50 +288,50 @@ function checkLogin(req, res, next){
 }
 
 function findReastaurant(criteria, back){
-    mongoose.connect(mongourl);
-    var db = mongoose.Connection;
-    db.on('error', console.error.bind(console,'connection error'));
-    db.once('open',function (callback) {
-        var restaurant = mongoose.model('restaurants',restaurantSchema);
-        restaurant.find(criteria,function (err, docs) {
-            if (err) return console.error(err);
-            db.close();
-            back(docs);
-        })
+    //mongoose.connect(mongourl);
+    //var db = mongoose.Connection;
+    //db.on('error', console.error.bind(console,'connection error'));
+    //db.once('open',function (callback) {
+    //   var restaurant = mongoose.model('restaurants',restaurantSchema);
+    restaurant.find(criteria,function (err, docs) {
+        if (err) return console.error(err);
+        //db.close();
+        back(docs);
     });
+    //});
 }
 
 function getRestaurantDetail(id,back){
-    mongoose.connect(mongourl);
-    var db = mongoose.Connection;
-    db.on('error', console.error.bind(console,'connection error'));
-    db.once('open',function(callback){
-        var restaurant = mongoose.model('restaurants',restaurantSchema);
-        restaurant.findOne({
-            _id: id
-        },function(err, docs) {
-            if (err) return console.error(err);
-            db.close();
-            back(docs);
-        });
-    })
+    //mongoose.connect(mongourl);
+    //var db = mongoose.Connection;
+    //db.on('error', console.error.bind(console,'connection error'));
+    //db.once('open',function(callback){
+     //   var restaurant = mongoose.model('restaurants',restaurantSchema);
+    restaurant.findOne({
+        _id: id
+    },function(err, docs) {
+        if (err) return console.error(err);
+        //db.close();
+        back(docs);
+    });
+    //})
 }
 
 function verifyUser(userObj, back){
-    mongoose.connect(mongourl);
-    var db = mongoose.Connection;
-    db.on('error', console.error.bind(console, 'connection error'));
-    db.once('open', function(callback){
-        var user = mongoose.model('users', userSchema);
-        user.findOne(userObj, function(err, docs){
-            if(err){
-                console.error(err);
-                return res.redirect('/login');
-            }
-            db.close();
-            back(docs);
-        });
+    //mongoose.connect(mongourl);
+    //var db = mongoose.Connection;
+    //db.on('error', console.error.bind(console, 'connection error'));
+    //db.once('open', function(callback){
+    //    var user = mongoose.model('users', userSchema);
+    user.findOne(userObj, function(err, docs){
+        if(err){
+            console.error(err);
+            return res.redirect('/login');
+        }
+        //db.close();
+        back(docs);
     });
+    //});
 }
 
 app.listen(process.env.PORT || 8099);

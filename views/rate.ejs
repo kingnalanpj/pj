@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Rate</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css"/>
+</head>
+<body>
+    <div class = "jumbotron">
+        <h1>&nbspRate</h1>
+    </div>
+
+    <form class="form-horizontal" action="/rate" method="post">
+
+        <div class="form-group">
+            <input type="hidden" name="_id" value="<%=_id%>">
+            <label for="score" class="col-lg-1 control-label">Score(1-10)</label>
+            <div class="col-lg-3">
+                <input type="number" class="form-control" id="score" placeholder="Score(1-10)" name="score" min="1" max="10">
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-lg-offset-1 col-lg-2">
+                <button type="submit" class="btn btn-default">Submit</button>
+                <a class="btn btn-default" href="/display?_id=<%=_id%>" role="button">Back</a>
+            </div>
+        </div>
+
+
+    </form>
+</body>
+</html>

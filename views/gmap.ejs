@@ -1,0 +1,29 @@
+<html>
+<head>
+    <title><%=name%></title>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <script src="https://maps.googleapis.com/maps/api/js?sensor=true&key=AIzaSyDRjHZbfZ0qSDxEGeShPzpYfZE56VMjrDI&callback=initMap"
+            type="text/javascript"></script>
+    <script type="text/javascript">
+        var loadMap = function()
+        {
+            var myOptions = {
+                center: new google.maps.LatLng(<%=lat%>, <%=lon%>),
+                zoom: 16,
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            };
+            var map = new google.maps.Map(document.getElementById("map"),myOptions);
+
+            var marker = new google.maps.Marker({
+                position: new google.maps.LatLng(<%=lat%>, <%=lon%>),
+                map: map,
+                title: '<%=name%>'
+            });
+        };
+        window.onload= loadMap;
+    </script>
+</head>
+<body>
+<div id="map" style="height: 100%; width: 100%; position: absolute; background-color: rgb(229, 227, 223);"/>
+</body>
+</html>
