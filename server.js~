@@ -84,31 +84,45 @@ app.get("/read",checkLogin,function(req,res){
     });
 });
 
-app.get("/read/name/:value",function (req,res) {
+app.get("/api/read/name/:value",function (req,res) {
     var criteria = {
         "name" : req.params.value
     };
     findReastaurant(criteria,function (docs) {
-        res.end(JSON.stringify(docs));
+	if (docs != null)
+        	res.end(JSON.stringify(docs));
+	else{
+		res.send({});
+		res.end();
+	}
     });
 });
 
-app.get("/read/borough/:value",function (req,res) {
+app.get("/api/read/borough/:value",function (req,res) {
     var criteria = {
         "borough" : req.params.value
     };
     findReastaurant(criteria,function (docs) {
-        res.send(JSON.stringify(docs));
-	res.end();
+	if (docs != null)
+        	res.end(JSON.stringify(docs));
+	else{
+		res.send({});
+		res.end();
+	}
     });
 });
 
-app.get("/read/cuisine/:value",function (req,res) {
+app.get("/api/read/cuisine/:value",function (req,res) {
     var criteria = {
         "cuisine" : req.params.value
     };
     findReastaurant(criteria,function (docs) {
-        res.end(JSON.stringify(docs));
+	if (docs != null)
+        	res.end(JSON.stringify(docs));
+	else{
+		res.send({});
+		res.end();
+	}
     });
 });
 

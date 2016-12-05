@@ -89,7 +89,12 @@ app.get("/api/read/name/:value",function (req,res) {
         "name" : req.params.value
     };
     findReastaurant(criteria,function (docs) {
-        res.end(JSON.stringify(docs));
+	if (docs.length >= 1)
+        	res.end(JSON.stringify(docs));
+	else{
+		res.send({});
+		res.end();
+	}
     });
 });
 
@@ -98,8 +103,12 @@ app.get("/api/read/borough/:value",function (req,res) {
         "borough" : req.params.value
     };
     findReastaurant(criteria,function (docs) {
-        res.send(JSON.stringify(docs));
-	res.end();
+	if (docs.length >= 1)
+        	res.end(JSON.stringify(docs));
+	else{
+		res.send({});
+		res.end();
+	}
     });
 });
 
@@ -108,7 +117,12 @@ app.get("/api/read/cuisine/:value",function (req,res) {
         "cuisine" : req.params.value
     };
     findReastaurant(criteria,function (docs) {
-        res.end(JSON.stringify(docs));
+	if (docs.length >= 1)
+        	res.end(JSON.stringify(docs));
+	else{
+		res.send({});
+		res.end();
+	}
     });
 });
 
