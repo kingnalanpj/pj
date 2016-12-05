@@ -11,7 +11,7 @@
         <h1>&nbsp<%=restaurant.name%></h1>
     </div>
 
-    <% if(restaurant.photo != null && restaurant.minetype.includes("image")){ %>
+    <% if(restaurant.photo != null){ %>
         <img class="img-thumbnail" src="data:<%=restaurant.minetype%>;base64,<%=restaurant.photo%>"/>
         <hr>
     <%}%>
